@@ -12,6 +12,14 @@ class User(BaseModel):
     email: EmailStr
     password_hash: str
 
+class UserCreate(BaseModel):
+    """
+    Model for user creation, excluding password hash.
+    """
+    username: str
+    email: EmailStr
+    password: str
+
 # Task Model
 class TaskBase(BaseModel):
     """

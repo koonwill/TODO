@@ -1,26 +1,52 @@
-from fastapi import HTTPException, Request
-from model import User
-from db import get_user_collection
+from datetime import timedelta, datetime, timezone
 import bcrypt
+import jwt
+from decouple import config
+from fastapi import HTTPException, Request
+
+from db import get_user_collection
+from model import User
+
+access_token_expiry = config('ACCESS_TOKEN_EXPIRE_MINUTES', cast=int)
+refresh_token_expiry = config('REFRESH_TOKEN_EXPIRE_MINUTES', cast=int)
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bool(
-        bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+        bcrypt.checkpw(plain_password.encode('utf-8'),
+                       hashed_password.encode('utf-8'))
     )
+
 
 def create_access_token(user_id: str):
     """
     Create a JWT access token for the user.
     """
-    # This is a placeholder for JWT creation logic
-    return "fake_access_token"
+    expire_delta = datetime.now(timezone.utc) + \
+        timedelta(minutes=access_token_expiry)
+    json_payload = {
+        "user_id": user_id,
+        "exp": expire_delta
+    }
+    encoded_jwt = jwt.encode(json_payload, config(
+        'ACCESS_TOKEN_SECRET_KEY', cast=str), algorithm=config('JWT_ALGORITHM', cast=str))
+    return encoded_jwt
+
 
 def create_refresh_token(user_id: str):
     """
     Create a JWT refresh token for the user.
     """
-    # This is a placeholder for JWT creation logic
-    return "fake_refresh_token"
+    expire_delta = datetime.now(timezone.utc) + \
+        timedelta(minutes=refresh_token_expiry)
+    json_payload = {
+        "user_id": user_id,
+        "exp": expire_delta
+    }
+    encoded_jwt = jwt.encode(json_payload, config(
+        'REFRESH_TOKEN_SECRET_KEY', cast=str), algorithm=config('JWT_ALGORITHM', cast=str))
+    return encoded_jwt
+
 
 def authenticate_user(username: str, password: str):
     """
@@ -37,6 +63,7 @@ def authenticate_user(username: str, password: str):
         "refresh_token": create_refresh_token(user['user_id']),
     }
 
+
 def check_token(request: Request):
     """
     Dependency to check the token in the request.
@@ -47,6 +74,7 @@ def check_token(request: Request):
     if token != "valid_token":
         raise HTTPException(status_code=403, detail="Invalid token")
     return "Token is valid"
+
 
 def create_user(user: User):
     """
@@ -62,4 +90,5 @@ def create_user(user: User):
         result = user_collection.insert_one(user_dict)
         return {"id": str(result.inserted_id), "message": "User created successfully"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error creating user: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error creating user: {str(e)}")
