@@ -1,0 +1,9 @@
+fastapi[all]
+python-decouple
+PyJWT
+bcrypt
+pymongo
+requests
+pydantic
+selenium
+motor
