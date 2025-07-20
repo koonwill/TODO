@@ -2,11 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { apiRequest, User } from '../utils/api';
 
-interface SignUpPageProps {
-    // onNavigateToLogin prop is no longer needed
-}
 
-const SignUpPage: React.FC<SignUpPageProps> = () => {
+const SignUpPage: React.FC = () => {
     const [username, setUsername] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');

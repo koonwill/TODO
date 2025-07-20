@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { apiRequest, TokenResponse, ErrorResponse } from '../utils/api';
+import { apiRequest, type TokenResponse, type ErrorResponse } from '../utils/api';
 
 interface LoginPageProps {
     onLoginSuccess: () => void;
