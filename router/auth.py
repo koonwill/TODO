@@ -2,7 +2,7 @@ from auth.auth_handler import authenticate_user, create_user
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from db import get_user_collection
-from model import User, UserCreate
+from model import User
 
 router = APIRouter(
     prefix="/api/auth",
@@ -24,7 +24,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         raise e
 
 @router.post("/register")
-async def register(user: UserCreate):
+async def register(user: User):
     """
     User registration endpoint.
     """

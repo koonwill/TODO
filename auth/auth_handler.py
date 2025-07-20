@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime, timezone
+from uuid import uuid4
 import bcrypt
 import jwt
 from decouple import config
@@ -28,9 +29,11 @@ def create_access_token(user_id: str):
         "user_id": user_id,
         "exp": expire_delta
     }
-    encoded_jwt = jwt.encode(json_payload, config(
-        'ACCESS_TOKEN_SECRET_KEY', cast=str), algorithm=config('JWT_ALGORITHM', cast=str))
-    return encoded_jwt
+    return jwt.encode(
+        json_payload,
+        config('JWT_ACCESS_TOKEN_SECRET_KEY', cast=str),
+        algorithm=config('JWT_ALGORITHM', cast=str),
+    )
 
 
 def create_refresh_token(user_id: str):
@@ -43,9 +46,11 @@ def create_refresh_token(user_id: str):
         "user_id": user_id,
         "exp": expire_delta
     }
-    encoded_jwt = jwt.encode(json_payload, config(
-        'REFRESH_TOKEN_SECRET_KEY', cast=str), algorithm=config('JWT_ALGORITHM', cast=str))
-    return encoded_jwt
+    return jwt.encode(
+        json_payload,
+        config('JWT_REFRESH_TOKEN_SECRET_KEY', cast=str),
+        algorithm=config('JWT_ALGORITHM', cast=str),
+    )
 
 
 def authenticate_user(username: str, password: str):
@@ -86,8 +91,14 @@ def create_user(user: User):
     if user_collection.find_one({"username": user.username}):
         raise HTTPException(status_code=400, detail="Username already taken")
     try:
-        user_dict = user.dict()
-        result = user_collection.insert_one(user_dict)
+        user_schema = {
+            "user_id": str(uuid4()),
+            "username": user.username,
+            "email": user.email,
+            "password_hash": bcrypt.hashpw(user.password.encode('utf-8'),
+                                           bcrypt.gensalt()).decode('utf-8')
+        }
+        result = user_collection.insert_one(user_schema)
         return {"id": str(result.inserted_id), "message": "User created successfully"}
     except Exception as e:
         raise HTTPException(
