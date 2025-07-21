@@ -70,11 +70,15 @@ button:focus-visible {
 } */
 
 :root {
-  background-color: white;
-  font-family: 'Sarabun', sans-serif;
+  background-color: #F4D387;
+  font-family: 'kanit', sans-serif;
 }
 
 body {
   margin: 0;
   padding: 0;
+}
+
+@theme{
+  --color-primary: #4F3CC9;
 }

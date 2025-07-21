@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { apiRequest, User } from '../utils/api';
-
+import { useNavigate } from 'react-router-dom';
+import { apiRequest, type User } from '../utils/api';
 
 const SignUpPage: React.FC = () => {
     const [username, setUsername] = useState<string>('');
@@ -11,7 +10,7 @@ const SignUpPage: React.FC = () => {
     const [error, setError] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate();
 
     const handleSignUp = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,11 +41,9 @@ const SignUpPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-yellow-200 to-pink-200 flex items-center justify-center p-4 font-inter">
-            <div className="flex flex-col lg:flex-row bg-white rounded-3xl shadow-2xl overflow-hidden max-w-6xl w-full">
-                {/* Left Section - Image/Illustration */}
-                <div className="lg:w-1/2 p-8 bg-yellow-100 flex items-center justify-center relative overflow-hidden rounded-l-3xl">
-                    <div className="absolute inset-0 bg-gradient-to-br from-yellow-200 to-pink-200 opacity-20"></div>
+        <div className="min-h-screen flex font-inter shadow-2xl overflow-hidden">
+            <div className="flex flex-col lg:flex-row w-full">
+                <div className="lg:w-2/5 p-8 flex items-center justify-center relative">
                     <div className="relative z-10 text-center">
                         <h1 className="text-4xl font-extrabold text-pink-600 mb-4">WHAT TO DO?</h1>
                         <p className="text-2xl font-semibold text-gray-800 leading-tight">
@@ -63,11 +60,11 @@ const SignUpPage: React.FC = () => {
                 </div>
 
                 {/* Right Section - Sign Up Form */}
-                <div className="lg:w-1/2 p-10 flex flex-col justify-center">
+                <div className="lg:w-3/5 px-80 flex flex-col justify-center bg-white shadow-2xl"> {/* Changed lg:w-1/2 to lg:w-3/5 */}
                     <div className="text-right mb-8">
                         <span className="text-gray-600 text-sm">Already a member? </span>
                         <button
-                            onClick={() => navigate('/login')} // Use navigate to go to login
+                            onClick={() => navigate('/login')}
                             className="text-pink-600 hover:underline font-semibold text-sm"
                         >
                             Sign In
@@ -110,7 +107,7 @@ const SignUpPage: React.FC = () => {
                                 required
                             />
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center size">
                             <input
                                 type="checkbox"
                                 id="terms"
@@ -120,9 +117,9 @@ const SignUpPage: React.FC = () => {
                             />
                             <label htmlFor="terms" className="ml-2 text-gray-700 text-sm">
                                 Creating an account means you're okay with our{' '}
-                                <a href="#" className="text-pink-600 hover:underline">Terms of Service</a>,{' '}
-                                <a href="#" className="text-pink-600 hover:underline">Privacy Policy</a>, and our default{' '}
-                                <a href="#" className="text-pink-600 hover:underline">Notification Settings</a>.
+                                <a href="#" className="text-primary hover:underline font-semibold">Terms of Service</a>,{' '}
+                                <a href="#" className="text-primary hover:underline font-semibold">Privacy Policy</a>, and our default{' '}
+                                <a href="#" className="text-primary hover:underline font-semibold">Notification Settings</a>.
                             </label>
                         </div>
                         {error && <p className="text-red-500 text-sm">{error}</p>}

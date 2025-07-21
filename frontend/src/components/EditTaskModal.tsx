@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { Task } from '../utils/api'; // Import Task interface
+import type { Task } from '../utils/api'; // Import Task interface
 
 interface EditTaskModalProps {
     task: Task;

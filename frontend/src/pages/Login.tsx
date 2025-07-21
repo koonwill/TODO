@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { apiRequest, type TokenResponse, type ErrorResponse } from '../utils/api';
 
 interface LoginPageProps {
@@ -12,7 +11,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     const [password, setPassword] = useState<string>('');
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,7 +22,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             formBody.append('username', username);
             formBody.append('password', password);
 
-            const response = await fetch(`${API_BASE_URL}/token`, { // Use API_BASE_URL directly
+            const API_BASE_URL = 'http://localhost:8000'; // Define here as it's not imported from utils/api directly for fetch
+            const response = await fetch(`${API_BASE_URL}/token`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -40,7 +40,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
             localStorage.setItem('accessToken', (data as TokenResponse).access_token);
             onLoginSuccess();
-            navigate('/tasks'); // Navigate to tasks page on success
+            navigate('/tasks');
         } catch (err: any) {
             setError(err.message || 'Network error, please try again.');
         } finally {
@@ -48,14 +48,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         }
     };
 
-    const API_BASE_URL = 'http://localhost:8000'; // Define here as it's not imported from utils/api directly for fetch
-
     return (
-        <div className="min-h-screen bg-gradient-to-br from-yellow-200 to-pink-200 flex items-center justify-center p-4 font-inter">
-            <div className="flex flex-col lg:flex-row bg-white rounded-3xl shadow-2xl overflow-hidden max-w-6xl w-full">
-                {/* Left Section - Image/Illustration */}
-                <div className="lg:w-1/2 p-8 bg-yellow-100 flex items-center justify-center relative overflow-hidden rounded-l-3xl">
-                    <div className="absolute inset-0 bg-gradient-to-br from-yellow-200 to-pink-200 opacity-20"></div>
+        <div className="min-h-screen flex font-inter shadow-2xl overflow-hidden">
+            <div className="flex flex-col lg:flex-row w-full">
+                <div className="lg:w-2/5 p-8 flex items-center justify-center relative">
                     <div className="relative z-10 text-center">
                         <h1 className="text-4xl font-extrabold text-pink-600 mb-4">WHAT TO DO?</h1>
                         <p className="text-2xl font-semibold text-gray-800 leading-tight">
@@ -72,11 +68,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 </div>
 
                 {/* Right Section - Login Form */}
-                <div className="lg:w-1/2 p-10 flex flex-col justify-center">
+                <div className="lg:w-3/5 px-80 flex flex-col justify-center bg-white shadow-2xl">
                     <div className="text-right mb-8">
                         <span className="text-gray-600 text-sm">Don't have an account? </span>
                         <button
-                            onClick={() => navigate('/signup')} // Use navigate to go to signup
+                            onClick={() => navigate('/signup')}
                             className="text-pink-600 hover:underline font-semibold text-sm"
                         >
                             Sign Up

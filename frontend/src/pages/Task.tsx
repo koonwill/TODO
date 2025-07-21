@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { apiRequest, Task } from '../utils/api';
+import { apiRequest, type Task } from '../utils/api';
 import EditTaskModal from '../components/EditTaskModal';
 
 interface TaskPageProps {
