@@ -24,7 +24,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             formBody.append('password', password);
 
             const API_BASE_URL = 'http://localhost:8000'; // Define here as it's not imported from utils/api directly for fetch
-            const response = await fetch(`${API_BASE_URL}/token`, {
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

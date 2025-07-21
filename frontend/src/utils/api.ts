@@ -11,7 +11,7 @@ export interface User {
 }
 
 export interface Task {
-    id: string; // UUID as string
+    task_id: string; // UUID as string
     user_id: string; // UUID as string
     title: string;
     description: string;
@@ -63,5 +63,16 @@ export async function apiRequest<T>(
     } catch (error) {
         console.error('API Request Error:', error);
         throw error; // Re-throw to be caught by the calling function
+    }
+}
+
+import { jwtDecode } from 'jwt-decode';
+
+export function decodeJWT(token: string): { username?: string; user_id?: string } | null {
+    try {
+        return jwtDecode<{ username?: string; user_id?: string }>(token);
+    } catch (e) {
+        console.error('Failed to decode JWT:', e);
+        return null;
     }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { apiRequest, type Task } from '../utils/api';
+import { useNavigate } from 'react-router-dom';
+import { apiRequest, decodeJWT, type Task } from '../utils/api';
 import EditTaskModal from '../components/EditTaskModal';
 
 interface TaskPageProps {
@@ -8,7 +8,7 @@ interface TaskPageProps {
 }
 
 const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
-    const [username, setUsername] = useState<string>('User'); // Placeholder, ideally fetched from auth
+    const [username, setUsername] = useState<string>('User');
     const [tasks, setTasks] = useState<Task[]>([]);
     const [newTaskTitle, setNewTaskTitle] = useState<string>('');
     const [newTaskDueDate, setNewTaskDueDate] = useState<string>('');
@@ -21,17 +21,23 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
 
     useEffect(() => {
         if (!accessToken) {
-            onLogout(); // This will now trigger the App.tsx logout and navigate
+            onLogout();
             return;
         }
+        // Decode JWT to get username and user_id
+        const payload = decodeJWT(accessToken);
+        if (payload) {
+            setUsername(payload.username || 'User');
+        }
         fetchTasks();
-    }, [accessToken, onLogout]); // Added onLogout to dependencies as it's used in useEffect
+    }, [accessToken, onLogout]);
 
     const fetchTasks = async () => {
         setLoading(true);
         setError('');
         try {
-            const data = await apiRequest<Task[]>('GET', '/tasks/', null, accessToken);
+            const data = await apiRequest<Task[]>('GET', '/api/tasks/', null, accessToken);
+            console.log(data);
             setTasks(data);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch tasks.');
@@ -59,7 +65,7 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
                 completed: false,
                 due_date: newTaskDueDate ? new Date(newTaskDueDate).toISOString() : null,
             };
-            await apiRequest<Task>('POST', '/tasks/', newTaskData, accessToken);
+            await apiRequest<Task>('POST', '/api/tasks/', newTaskData, accessToken);
             setNewTaskTitle('');
             setNewTaskDueDate('');
             fetchTasks();
@@ -71,7 +77,11 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
     const handleToggleComplete = async (taskId: string, currentCompleted: boolean) => {
         setError('');
         try {
-            await apiRequest<Task>('PUT', `/tasks/${taskId}`, { completed: !currentCompleted }, accessToken);
+            const taskSchema = {
+                ...tasks.find(task => task.task_id === taskId),
+                completed: !currentCompleted,
+            }
+            await apiRequest<Task>('PUT', `/api/tasks/${taskId}`, taskSchema, accessToken);
             fetchTasks();
         } catch (err: any) {
             setError(err.message || 'Failed to update task status.');
@@ -82,7 +92,7 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
         setError('');
         if (window.confirm('Are you sure you want to delete this task?')) {
             try {
-                await apiRequest<void>('DELETE', `/tasks/${taskId}`, null, accessToken);
+                await apiRequest<void>('DELETE', `/api/tasks/${taskId}`, null, accessToken);
                 fetchTasks();
             } catch (err: any) {
                 setError(err.message || 'Failed to delete task.');
@@ -97,7 +107,7 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
     const handleSaveEditedTask = async (taskId: string, updatedData: Partial<Task>) => {
         setError('');
         try {
-            await apiRequest<Task>('PUT', `/tasks/${taskId}`, updatedData, accessToken);
+            await apiRequest<Task>('PUT', `/api/tasks/${taskId}`, updatedData, accessToken);
             fetchTasks();
             setEditingTask(null);
         } catch (err: any) {
@@ -129,7 +139,7 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
         <div className="min-h-screen bg-gray-100 font-inter p-4">
             {/* Header */}
             <header className="bg-white rounded-xl shadow-md p-4 flex justify-between items-center mb-6">
-                <h1 className="text-xl font-bold text-gray-800">HELLO, {username.toUpperCase()} :)</h1>
+                <h1 className="text-xl font-bold text-gray-800">HELLO, {username.toUpperCase()} :</h1>
                 <h2 className="text-2xl font-extrabold text-pink-600">WHAT TO DO?</h2>
                 <button
                     onClick={onLogout} // This will trigger the logout logic in App.tsx
@@ -197,7 +207,7 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
                                                 type="checkbox"
                                                 className="form-checkbox h-5 w-5 text-pink-600 rounded"
                                                 checked={task.completed}
-                                                onChange={() => handleToggleComplete(task.id, task.completed)}
+                                                onChange={() => handleToggleComplete(task.task_id, task.completed)}
                                             />
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -254,13 +264,13 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
                                 </tr>
                             ) : (
                                 completedTasks.map((task) => (
-                                    <tr key={task.id} className="line-through text-gray-500">
+                                    <tr key={task.task_id} className="line-through text-gray-500">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <input
                                                 type="checkbox"
                                                 className="form-checkbox h-5 w-5 text-pink-600 rounded"
                                                 checked={task.completed}
-                                                onChange={() => handleToggleComplete(task.id, task.completed)}
+                                                onChange={() => handleToggleComplete(task.task_id, task.completed)}
                                             />
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -280,7 +290,7 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
                                                 </svg>
                                             </button>
                                             <button
-                                                onClick={() => handleDeleteTask(task.id)}
+                                                onClick={() => handleDeleteTask(task.task_id)}
                                                 className="text-gray-600 hover:text-red-600 mx-2"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

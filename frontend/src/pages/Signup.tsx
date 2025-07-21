@@ -27,7 +27,7 @@ const SignUpPage: React.FC = () => {
 
         try {
             const userData = { username, email, password };
-            await apiRequest<User>('POST', '/users/', userData);
+            await apiRequest<User>('POST', '/api/auth/register', userData);
             setSuccessMessage('Account created successfully! Please sign in.');
             setUsername('');
             setEmail('');

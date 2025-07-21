@@ -22,7 +22,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onSave }) 
                 title: taskName,
                 due_date: dueDate ? new Date(dueDate).toISOString() : null,
             };
-            await onSave(task.id, updatedTask);
+            await onSave(task.task_id, updatedTask);
             onClose();
         } catch (err: any) {
             setError(err.message || 'Failed to save task.');

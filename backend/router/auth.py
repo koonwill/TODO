@@ -10,22 +10,19 @@ router = APIRouter(
 )
 
 @router.post("/login")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     User login endpoint.
     """
     try:
-        token = await authenticate_user(form_data.username, form_data.password)
-        return {
-            "access_token": token.access_token,
-            "refresh_token": token.refresh_token,
-        }
+        token = authenticate_user(form_data.username, form_data.password)
+        return token
     except HTTPException as e:
         raise e
 
 @router.post("/register")
-async def register(user: User):
+def register(user: User):
     """
     User registration endpoint.
     """
-    return await create_user(user)
+    return create_user(user)

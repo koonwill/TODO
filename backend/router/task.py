@@ -1,5 +1,5 @@
 from controllers.task_controller import edit_task_by_id, get_all_tasks, create_task, get_task_by_id, delete_task_by_id
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Request
 from auth.auth_handler import check_token
 from model import TaskBase
 
@@ -10,45 +10,45 @@ router = APIRouter(
 )
 
 @router.get("/")
-async def get_tasks(
-):
+def get_tasks(request: Request):
     """
-    Get all tasks.
+    Get all tasks for the current user.
     """
-    return await get_all_tasks()
+    return get_all_tasks(request)
 
 @router.post("/")
-async def create_new_task(
+def create_new_task(
     task: TaskBase,
+    request: Request,
 ):
     """
     Create a new task.
     """
-    return await create_task(task)
+    return create_task(task, request)
 
 @router.get("/{task_id}")
-async def get_task(
+def get_task(
     task_id: str,
 ):
     """
     Get a task by its ID.
     """
-    return await get_task_by_id(task_id)
+    return get_task_by_id(task_id)
 
 @router.put("/{task_id}")
-async def update_task(
+def update_task(
     task_id: str,
     task: TaskBase,
 ):
     """
     Edit an existing task.
     """
-    return await edit_task_by_id(task_id, task)
+    return edit_task_by_id(task_id, task)
 
 @router.delete("/{task_id}")
-async def delete_task(
+def delete_task(
     task_id: str):
     """
     Delete a task by its ID.
     """
-    return await delete_task_by_id(task_id)
+    return delete_task_by_id(task_id)

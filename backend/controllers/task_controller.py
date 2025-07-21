@@ -1,83 +1,93 @@
-from fastapi import Depends, HTTPException
+from uuid import uuid4
+from fastapi import HTTPException, Request
 from model import TaskBase
 
 from db import get_task_collection
 
 
-async def get_all_tasks(
-    task_collection=Depends(get_task_collection)
-):
+def get_all_tasks(request: Request):
     """
     Retrieve all tasks
     """
-    if not task_collection:
+    task_collection = get_task_collection()
+    user_id = request.state.user_id
+    if task_collection is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     try:
-        tasks = await task_collection.find().to_list(length=None)
+        tasks = list(task_collection.find({"user_id": user_id},{"_id": 0}))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching tasks: {str(e)}")
     return tasks
 
-async def create_task(
+def create_task(
     task: TaskBase,
-    task_collection=Depends(get_task_collection)
+    request: Request,
 ):
     """
     Create a new task
     """
-    if not task_collection:
+    task_collection = get_task_collection()
+    
+    if task_collection is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     try:
-        task_dict = task.dict()
-        result = await task_collection.insert_one(task_dict)
+        create_task_dict = {
+            "task_id": str(uuid4()),
+            "user_id": request.state.user_id,
+            "title": task.title,
+            "description": task.description,
+            "completed": task.completed,
+            "due_date": task.due_date.isoformat(),
+        }
+        result = task_collection.insert_one(create_task_dict)
         return {"id": str(result.inserted_id), "message": "Task created successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating task: {str(e)}")
     
-async def get_task_by_id(
+def get_task_by_id(
     task_id: str,
-    task_collection=Depends(get_task_collection)
 ):
     """Get a task by its ID"""
-    if not task_collection:
+    task_collection = get_task_collection()
+    if task_collection is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     try:
-        task = await task_collection.find_one({"task_id": task_id})
+        task = task_collection.find_one({"task_id": task_id})
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
         return task
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching task: {str(e)}")
     
-async def edit_task_by_id(
+def edit_task_by_id(
     task_id: str,
     task: TaskBase,
-    task_collection=Depends(get_task_collection)
 ):
     """
     Edit an existing task
     """
-    if not task_collection:
+    task_collection = get_task_collection()
+    if task_collection is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     try:
-        result = await task_collection.update_one({"task_id": task_id}, {"$set": task.dict()})
+        result = task_collection.update_one({"task_id": task_id}, {"$set": task.dict()})
         if result.modified_count == 0:
             raise HTTPException(status_code=404, detail="Task not found")
         return {"message": "Task updated successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating task: {str(e)}")
     
-async def delete_task_by_id(
+def delete_task_by_id(
     task_id: str,
-    task_collection=Depends(get_task_collection)
 ):
     """
     Delete a task by its ID
     """
-    if not task_collection:
+    task_collection = get_task_collection()
+    if task_collection is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     try:
-        result = await task_collection.delete_one({"task_id": task_id})
+        result = task_collection.delete_one({"task_id": task_id})
         if result.deleted_count == 0:
             raise HTTPException(status_code=404, detail="Task not found")
         return {"message": "Task deleted successfully"}

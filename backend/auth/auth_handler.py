@@ -19,7 +19,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     )
 
 
-def create_access_token(user_id: str):
+def create_access_token(user_id: str, username: str):
     """
     Create a JWT access token for the user.
     """
@@ -27,28 +27,12 @@ def create_access_token(user_id: str):
         timedelta(minutes=access_token_expiry)
     json_payload = {
         "user_id": user_id,
+        "username": username,
         "exp": expire_delta
     }
     return jwt.encode(
         json_payload,
         config('JWT_ACCESS_TOKEN_SECRET_KEY', cast=str),
-        algorithm=config('JWT_ALGORITHM', cast=str),
-    )
-
-
-def create_refresh_token(user_id: str):
-    """
-    Create a JWT refresh token for the user.
-    """
-    expire_delta = datetime.now(timezone.utc) + \
-        timedelta(minutes=refresh_token_expiry)
-    json_payload = {
-        "user_id": user_id,
-        "exp": expire_delta
-    }
-    return jwt.encode(
-        json_payload,
-        config('JWT_REFRESH_TOKEN_SECRET_KEY', cast=str),
         algorithm=config('JWT_ALGORITHM', cast=str),
     )
 
@@ -64,8 +48,7 @@ def authenticate_user(username: str, password: str):
     if not verify_password(password, user['password_hash']):
         raise HTTPException(status_code=401, detail="Incorrect password")
     return {
-        "access_token": create_access_token(user['user_id']),
-        "refresh_token": create_refresh_token(user['user_id']),
+        "access_token": create_access_token(user['user_id'], user['username']),
     }
 
 
@@ -76,9 +59,18 @@ def check_token(request: Request):
     token = request.headers.get("Authorization").replace("Bearer ", "")
     if not token:
         raise HTTPException(status_code=401, detail="Token is missing")
-    if token != "valid_token":
-        raise HTTPException(status_code=403, detail="Invalid token")
-    return "Token is valid"
+    try:
+        payload = jwt.decode(
+            token,
+            config('JWT_ACCESS_TOKEN_SECRET_KEY', cast=str),
+            algorithms=[config('JWT_ALGORITHM', cast=str)],
+        )
+        user_id = get_user_collection().find_one({"username": payload.get("username")})
+        request.state.user_id = user_id['user_id']
+        request.state.username = payload.get("username")
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
 
 
 def create_user(user: User):

@@ -20,7 +20,6 @@ class TaskBase(BaseModel):
     """
     Base model for task data, including common fields for creation and updates.
     """
-    user_id: UUID
     title: str
     description: str = Field(default="")
     completed: bool = Field(default=False)
