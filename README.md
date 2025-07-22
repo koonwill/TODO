@@ -65,6 +65,13 @@ TODO/
 
 ## Testing
 
+CI
+You can check out GitHub CI in actions or the green check mark to see the results, as it automatically runs when git is updated.
+<img width="892" height="54" alt="image" src="https://github.com/user-attachments/assets/661eacc7-3859-461f-9071-49cd0efe7b09" />
+
+
+Manually Run the test file for testing,
+
 From the `backend` directory make sure you have .env file ready:
 
 ```bash
