@@ -22,8 +22,7 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
 
     useEffect(() => {
         if (!accessToken) {
-            onLogout();
-            navigate('/login', { replace: true });
+            handleLogout();
             return;
         }
         // Decode JWT to get username and user_id
@@ -34,6 +33,20 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
         fetchTasks();
     }, [accessToken, onLogout, navigate]);
 
+    const handleLogout = () => {
+            // Reset all local state to default
+            setUsername('User');
+            setTasks([]);
+            setLoading(true);
+            setError('');
+            setEditingTask(null);
+            setShowAddModal(false);
+            setModalLoading(false);
+            setModalError('');
+            onLogout(); // This will also clear accessToken and update parent state
+            navigate('/login', { replace: true });
+        }
+
     const fetchTasks = async () => {
         setLoading(true);
         setError('');
@@ -41,6 +54,9 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
             const data = await apiRequest<Task[]>('GET', '/api/tasks/', null, accessToken);
             setTasks(data);
         } catch (err: any) {
+            if (err.message && err.message.includes('Token has expired')) {
+                handleLogout(); // Token expired or invalid, force logout
+            }
             setError(err.message || 'Failed to fetch tasks.');
         } finally {
             setLoading(false);
@@ -60,6 +76,9 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
             fetchTasks();
             setShowAddModal(false);
         } catch (err: any) {
+            if (err.message && err.message.includes('Token has expired')) {
+                handleLogout(); // Token expired or invalid, force logout
+            }
             setModalError(err.message || 'Failed to add task.');
         } finally {
             setModalLoading(false);
@@ -76,6 +95,9 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
             await apiRequest<Task>('PUT', `/api/tasks/${taskId}`, taskSchema, accessToken);
             fetchTasks();
         } catch (err: any) {
+            if (err.message && err.message.includes('Token has expired')) {
+                handleLogout(); // Token expired or invalid, force logout
+            }
             setError(err.message || 'Failed to update task status.');
         }
     };
@@ -87,6 +109,9 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
                 await apiRequest<void>('DELETE', `/api/tasks/${taskId}`, null, accessToken);
                 fetchTasks();
             } catch (err: any) {
+                if (err.message && err.message.includes('Token has expired')) {
+                handleLogout(); // Token expired or invalid, force logout
+            }
                 setError(err.message || 'Failed to delete task.');
             }
         }
@@ -111,6 +136,9 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
             fetchTasks();
             setEditingTask(null);
         } catch (err: any) {
+            if (err.message && err.message.includes('Token has expired')) {
+                handleLogout(); // Token expired or invalid, force logout
+            }
             setModalError(err.message || 'Failed to save edited task.');
         } finally {
             setModalLoading(false);
@@ -169,7 +197,7 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
             </nav>
 
             {/* Unified Card Container */}
-            <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8 mb-8 flex flex-col gap-8">
+            <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8 mb-8 flex flex-col gap-5">
                 {/* Add New To-Do Button */}
                 <button
                     className="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-xl transition duration-200 ease-in-out transform hover:scale-105 text-lg mb-2"
@@ -257,7 +285,7 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
                             <thead>
                                 <tr>
                                     <th className="pl-7 pr-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-widest bg-white rounded-tl-xl"></th>
-                                    <th className="pl-0 pr-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-widest bg-white">TASK NAME</th>
+                                    <th className="py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-widest bg-white">TASK NAME</th>
                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-widest bg-white">DUE</th>
                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-widest bg-white rounded-tr-xl"></th>
                                 </tr>
@@ -280,7 +308,7 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
                                                     onChange={() => handleToggleComplete(task.task_id, task.completed)}
                                                 />
                                             </td>
-                                            <td className="pl-0 pr-8 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <td className="pr-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                 {task.title}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
