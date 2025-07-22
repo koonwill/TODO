@@ -39,11 +39,12 @@ def get_task(
 def update_task(
     task_id: str,
     task: TaskBase,
+    request: Request,
 ):
     """
     Edit an existing task.
     """
-    return edit_task_by_id(task_id, task)
+    return edit_task_by_id(task_id, task, request)
 
 @router.delete("/{task_id}")
 def delete_task(

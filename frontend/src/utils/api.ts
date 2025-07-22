@@ -1,24 +1,21 @@
-// Base API URL - adjust this if your backend is running on a different address/port
 export const API_BASE_URL = 'http://localhost:8000';
-
-// --- TypeScript Type Definitions ---
 export interface User {
-    id: string; // UUID as string
+    id: string;
     username: string;
     email: string;
-    created_at: string; // ISO string
-    updated_at: string; // ISO string
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Task {
-    task_id: string; // UUID as string
-    user_id: string; // UUID as string
+    task_id: string;
+    user_id: string;
     title: string;
     description: string;
     completed: boolean;
-    due_date: string | null; // ISO string or null
-    created_at: string; // ISO string
-    updated_at: string; // ISO string
+    due_date: string | null;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface TokenResponse {
@@ -55,14 +52,13 @@ export async function apiRequest<T>(
         const responseData = await response.json();
 
         if (!response.ok) {
-            // Handle specific HTTP errors from the backend
             const errorDetail = (responseData as ErrorResponse).detail || 'Something went wrong';
             throw new Error(errorDetail);
         }
         return responseData as T;
     } catch (error) {
         console.error('API Request Error:', error);
-        throw error; // Re-throw to be caught by the calling function
+        throw error;
     }
 }
 

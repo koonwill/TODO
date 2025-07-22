@@ -62,6 +62,7 @@ def get_task_by_id(
 def edit_task_by_id(
     task_id: str,
     task: TaskBase,
+    request: Request,
 ):
     """
     Edit an existing task
@@ -70,7 +71,15 @@ def edit_task_by_id(
     if task_collection is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     try:
-        result = task_collection.update_one({"task_id": task_id}, {"$set": task.dict()})
+        task_dict = {
+            "task_id": task_id,
+            "user_id": request.state.user_id,
+            "title": task.title,
+            "description": task.description,
+            "completed": task.completed,
+            "due_date": task.due_date.isoformat(),
+        }
+        result = task_collection.update_one({"task_id": task_id}, {"$set": task_dict})
         if result.modified_count == 0:
             raise HTTPException(status_code=404, detail="Task not found")
         return {"message": "Task updated successfully"}

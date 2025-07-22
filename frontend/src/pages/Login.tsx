@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiRequest, type TokenResponse, type ErrorResponse } from '../utils/api';
+import {type TokenResponse, type ErrorResponse } from '../utils/api';
 import signupImage from '../assets/signup.png'; // Import the image
 
 interface LoginPageProps {
