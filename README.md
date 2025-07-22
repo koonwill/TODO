@@ -65,7 +65,7 @@ TODO/
 
 ## Testing
 
-From the `backend` directory:
+From the `backend` directory make sure you have .env file ready:
 
 ```bash
 python -m unittest tests.test_auth
