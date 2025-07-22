@@ -1,0 +1,43 @@
+name: Backend Unittest CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-unittest:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9.13'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+        
+      - name: Create .env from secrets
+        run: |
+          echo "MONGO_URL=${{ secrets.MONGO_URL }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "USER_COLLECTION=${{ secrets.USER_COLLECTION }}" >> .env
+          echo "TASK_COLLECTION=${{ secrets.TASK_COLLECTION }}" >> .env
+          echo "JWT_ACCESS_TOKEN_SECRET_KEY=${{ secrets.JWT_ACCESS_TOKEN_SECRET_KEY }}" >> .env
+          echo "JWT_REFRESH_TOKEN_SECRET_KEY=${{ secrets.JWT_REFRESH_TOKEN_SECRET_KEY }}" >> .env
+          echo "JWT_ALGORITHM=${{ secrets.JWT_ALGORITHM }}" >> .env
+          echo "ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}" >> .env
+          echo "REFRESH_TOKEN_EXPIRE_MINUTES=${{ secrets.REFRESH_TOKEN_EXPIRE_MINUTES }}" >> .env
+
+      - name: Run backend test_auth
+        run: python -m unittest tests/test_auth.py
+        
+      - name: Run backend test_task
+        run: python -m unittest tests/test_task.py
