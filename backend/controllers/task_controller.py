@@ -40,7 +40,7 @@ def create_task(
             "due_date": task.due_date.isoformat(),
         }
         result = task_collection.insert_one(create_task_dict)
-        return {"id": str(result.inserted_id), "message": "Task created successfully"}
+        return {"success": str(result.acknowledged), "message": "Task created successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating task: {str(e)}")
     
@@ -52,7 +52,7 @@ def get_task_by_id(
     if task_collection is None:
         raise HTTPException(status_code=500, detail="Database connection error")
     try:
-        task = task_collection.find_one({"task_id": task_id})
+        task = task_collection.find_one({"task_id": task_id}, {"_id": 0})
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
         return task
