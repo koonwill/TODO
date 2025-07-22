@@ -170,7 +170,7 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
     const completedTasks = tasks.filter(task => task.completed).sort(sortByDueDateAsc);
 
     return (
-        <div className="min-h-screen w-screen fixed inset-0 bg-gray-100 font-inter overflow-auto">
+        <div className="min-h-screen w-screen fixed inset-0 bg-white font-inter overflow-auto">
             {/* Navbar */}
             <nav className="flex items-center justify-between px-6 py-3 mb-6" style={{ backgroundColor: '#F4D387' }}>
                 <div className="flex items-center space-x-4">
@@ -197,8 +197,8 @@ const TaskPage: React.FC<TaskPageProps> = ({ onLogout }) => {
             </nav>
 
             {/* Unified Card Container */}
-            <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8 mb-8 flex flex-col gap-5">
-                {/* Add New To-Do Button */}
+            <div className="w-full max-w-4xl mx-auto bg-white mb-8 flex flex-col gap-5">
+                {/* + New To-Do Button */}
                 <button
                     className="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-xl transition duration-200 ease-in-out transform hover:scale-105 text-lg mb-2"
                     onClick={() => setShowAddModal(true)}
